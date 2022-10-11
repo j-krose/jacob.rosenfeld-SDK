@@ -1,3 +1,3 @@
-module github.com/j-krose/jacob.rosenfeld-SDK
+module github.com/j-krose/jrosenfeldLotrSdk
 
 go 1.19
