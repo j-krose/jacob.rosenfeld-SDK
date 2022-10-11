@@ -9,21 +9,21 @@ import (
 var _ Sdk = (*sdk)(nil)
 
 type Sdk interface {
-	GetBooks() ([]Book, error)
+	GetBooks(...rest.UrlParameter) ([]Book, error)
 	GetBook(string) (Book, error)
-	GetMovies() ([]Movie, error)
+	GetMovies(...rest.UrlParameter) ([]Movie, error)
 	GetMovie(string) (Movie, error)
-	GetCharacters() ([]Character, error)
+	GetCharacters(...rest.UrlParameter) ([]Character, error)
 	GetCharacter(string) (Character, error)
-	GetQuotes() ([]Quote, error)
+	GetQuotes(...rest.UrlParameter) ([]Quote, error)
 	GetQuote(string) (Quote, error)
 	FillQuote(Quote) (FullQuote, error)
-	GetFullQuotes() ([]FullQuote, error)
+	GetFullQuotes(...rest.UrlParameter) ([]FullQuote, error)
 	GetFullQuote(string) (FullQuote, error)
-	GetChapters() ([]Chapter, error)
+	GetChapters(...rest.UrlParameter) ([]Chapter, error)
 	GetChapter(string) (Chapter, error)
 	FillChapter(Chapter) (FullChapter, error)
-	GetFullChapters() ([]FullChapter, error)
+	GetFullChapters(...rest.UrlParameter) ([]FullChapter, error)
 	GetFullChapter(string) (FullChapter, error)
 }
 
@@ -37,42 +37,42 @@ func NewSdk(apiKey string) sdk {
 
 // ----- /books -----
 
-func (s sdk) GetBooks() ([]Book, error) {
-	return rest.GetAndDecode[Book](composeUrl(book_endpoint), s.apiKey)
+func (s sdk) GetBooks(parameters ...rest.UrlParameter) ([]Book, error) {
+	return rest.GetAndDecode[Book](composeUrl(book_endpoint), s.apiKey, parameters)
 }
 
 func (s sdk) GetBook(id string) (Book, error) {
-	return rest.GetAndDecodeSingle[Book](composeUrl(book_endpoint, id), s.apiKey)
+	return rest.GetAndDecodeSingle[Book](composeUrl(book_endpoint, id), s.apiKey, []rest.UrlParameter{})
 }
 
 // ----- /movies -----
 
-func (s sdk) GetMovies() ([]Movie, error) {
-	return rest.GetAndDecode[Movie](composeUrl(movie_endpoint), s.apiKey)
+func (s sdk) GetMovies(parameters ...rest.UrlParameter) ([]Movie, error) {
+	return rest.GetAndDecode[Movie](composeUrl(movie_endpoint), s.apiKey, parameters)
 }
 
 func (s sdk) GetMovie(id string) (Movie, error) {
-	return rest.GetAndDecodeSingle[Movie](composeUrl(movie_endpoint, id), s.apiKey)
+	return rest.GetAndDecodeSingle[Movie](composeUrl(movie_endpoint, id), s.apiKey, []rest.UrlParameter{})
 }
 
 // ----- /character -----
 
-func (s sdk) GetCharacters() ([]Character, error) {
-	return rest.GetAndDecode[Character](composeUrl(character_endpoint), s.apiKey)
+func (s sdk) GetCharacters(parameters ...rest.UrlParameter) ([]Character, error) {
+	return rest.GetAndDecode[Character](composeUrl(character_endpoint), s.apiKey, parameters)
 }
 
 func (s sdk) GetCharacter(id string) (Character, error) {
-	return rest.GetAndDecodeSingle[Character](composeUrl(character_endpoint, id), s.apiKey)
+	return rest.GetAndDecodeSingle[Character](composeUrl(character_endpoint, id), s.apiKey, []rest.UrlParameter{})
 }
 
 // ----- /quote -----
 
-func (s sdk) GetQuotes() ([]Quote, error) {
-	return rest.GetAndDecode[Quote](composeUrl(quote_endpoint), s.apiKey)
+func (s sdk) GetQuotes(parameters ...rest.UrlParameter) ([]Quote, error) {
+	return rest.GetAndDecode[Quote](composeUrl(quote_endpoint), s.apiKey, parameters)
 }
 
 func (s sdk) GetQuote(id string) (Quote, error) {
-	return rest.GetAndDecodeSingle[Quote](composeUrl(quote_endpoint, id), s.apiKey)
+	return rest.GetAndDecodeSingle[Quote](composeUrl(quote_endpoint, id), s.apiKey, []rest.UrlParameter{})
 }
 
 func (s sdk) FillQuote(quote Quote) (FullQuote, error) {
@@ -103,8 +103,8 @@ func (s sdk) fillQuote(quote Quote, movies map[string]Movie, characters map[stri
 	return fullQuote, nil
 }
 
-func (s sdk) GetFullQuotes() ([]FullQuote, error) {
-	quotes, err := s.GetQuotes()
+func (s sdk) GetFullQuotes(parameters ...rest.UrlParameter) ([]FullQuote, error) {
+	quotes, err := s.GetQuotes(parameters...)
 	if err != nil {
 		return nil, err
 	}
@@ -132,12 +132,12 @@ func (s sdk) GetFullQuote(id string) (FullQuote, error) {
 }
 
 // ----- /chapter -----
-func (s sdk) GetChapters() ([]Chapter, error) {
-	return rest.GetAndDecode[Chapter](composeUrl(chapter_endpoint), s.apiKey)
+func (s sdk) GetChapters(parameters ...rest.UrlParameter) ([]Chapter, error) {
+	return rest.GetAndDecode[Chapter](composeUrl(chapter_endpoint), s.apiKey, parameters)
 }
 
 func (s sdk) GetChapter(id string) (Chapter, error) {
-	return rest.GetAndDecodeSingle[Chapter](composeUrl(chapter_endpoint, id), s.apiKey)
+	return rest.GetAndDecodeSingle[Chapter](composeUrl(chapter_endpoint, id), s.apiKey, []rest.UrlParameter{})
 }
 
 func (s sdk) FillChapter(chapter Chapter) (FullChapter, error) {
@@ -161,8 +161,8 @@ func (s sdk) fillChapter(chapter Chapter, books map[string]Book) (FullChapter, e
 	return fullChapter, nil
 }
 
-func (s sdk) GetFullChapters() ([]FullChapter, error) {
-	chapters, err := s.GetChapters()
+func (s sdk) GetFullChapters(parameters ...rest.UrlParameter) ([]FullChapter, error) {
+	chapters, err := s.GetChapters(parameters...)
 	if err != nil {
 		return nil, err
 	}

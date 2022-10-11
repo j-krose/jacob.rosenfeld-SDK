@@ -22,10 +22,6 @@ type apiResponse[T any] struct {
 	Pages int
 }
 
-func appendUrlQuery(url string, key string, value string) string {
-	return url + "?" + key + "=" + value
-}
-
 // For testing purposes, expose a count of how many times we have called `get`
 var apiCount = 0
 
@@ -37,18 +33,24 @@ func GetApiCount() int {
 	return apiCount
 }
 
-func get(url string, apiKey string) (io.ReadCloser, error) {
-	url = appendUrlQuery(url, "limit", strconv.Itoa(entry_limit))
+func get(url string, apiKey string, urlParamters []UrlParameter) (io.ReadCloser, error) {
+	// Add url parameters - pagination and user-supplied filters
+	url += "?" + BuildUrlParameter("limit", strconv.Itoa(entry_limit))
+	for _, parameter := range urlParamters {
+		url += "&" + parameter.GetUrlParameter()
+	}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("get failed to form new request for %v: %w", url, err)
 	}
 
+	// Set the bearer token if supplied by the caller
 	if len(apiKey) != 0 {
 		req.Header.Set("Authorization", "Bearer "+apiKey)
 	}
 
+	// Make the call
 	client := &http.Client{}
 	response, err := client.Do(req)
 	apiCount += 1
@@ -63,8 +65,8 @@ func get(url string, apiKey string) (io.ReadCloser, error) {
 }
 
 // Get an endpoint and decode the response into a list of T's
-func GetAndDecode[T any](url string, apiKey string) ([]T, error) {
-	body, err := get(url, apiKey)
+func GetAndDecode[T any](url string, apiKey string, urlParamters []UrlParameter) ([]T, error) {
+	body, err := get(url, apiKey, urlParamters)
 	if err != nil {
 		return nil, fmt.Errorf("GetAndDecode failed to get: %w", err)
 	}
@@ -85,8 +87,8 @@ func GetAndDecode[T any](url string, apiKey string) ([]T, error) {
 }
 
 // Get an endpoint and decode the response into a single T
-func GetAndDecodeSingle[T any](url string, apiKey string) (T, error) {
-	all, err := GetAndDecode[T](url, apiKey)
+func GetAndDecodeSingle[T any](url string, apiKey string, urlParamters []UrlParameter) (T, error) {
+	all, err := GetAndDecode[T](url, apiKey, urlParamters)
 	if err != nil {
 		return *new(T), fmt.Errorf("GetAndDecodeSingle failed: %w", err)
 	}
@@ -97,8 +99,8 @@ func GetAndDecodeSingle[T any](url string, apiKey string) (T, error) {
 }
 
 // Useful debugging tool, gets an endpoint and returns the response body as a string
-func GetBodyAsString(url string, apiKey string) (string, error) {
-	body, err := get(url, apiKey)
+func GetBodyAsString(url string, apiKey string, urlParamters []UrlParameter) (string, error) {
+	body, err := get(url, apiKey, urlParamters)
 	if err != nil {
 		return "", fmt.Errorf("GetAndPrint failed to get: %w", err)
 	}

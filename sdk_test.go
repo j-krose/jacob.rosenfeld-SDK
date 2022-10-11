@@ -57,6 +57,22 @@ func TestChapterFillingIsCached(t *testing.T) {
 	}
 }
 
+func TestFiltering(t *testing.T) {
+	if len(apiKey) == 0 {
+		t.Skip("Need api key for test")
+	}
+
+	sdk := NewSdk(apiKey)
+
+	characters, err := sdk.GetCharacters(Matches("name", "Gandalf"))
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	if len(characters) != 1 {
+		t.Errorf("Found %v characters", len(characters))
+	}
+}
+
 // I had a hard time factoring this test out to avoid repeated code, given more time I would make
 // all data structs adhere to a parent type with getId and getName methods to make it easier to
 // abstract things like this out
@@ -77,6 +93,9 @@ func TestEndpoints(t *testing.T) {
 		middleIndex := len(records) / 2
 		middleRecord := records[middleIndex]
 		middleRecordFromApi, err := sdk.GetBook(middleRecord.Id)
+		if err != nil {
+			t.Error(err)
+		}
 		if middleRecordFromApi != middleRecord {
 			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
 		}
@@ -93,6 +112,9 @@ func TestEndpoints(t *testing.T) {
 		middleIndex := len(records) / 2
 		middleRecord := records[middleIndex]
 		middleRecordFromApi, err := sdk.GetMovie(middleRecord.Id)
+		if err != nil {
+			t.Error(err)
+		}
 		if middleRecordFromApi != middleRecord {
 			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
 		}
@@ -109,6 +131,9 @@ func TestEndpoints(t *testing.T) {
 		middleIndex := len(records) / 2
 		middleRecord := records[middleIndex]
 		middleRecordFromApi, err := sdk.GetCharacter(middleRecord.Id)
+		if err != nil {
+			t.Error(err)
+		}
 		if middleRecordFromApi != middleRecord {
 			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
 		}
@@ -125,6 +150,9 @@ func TestEndpoints(t *testing.T) {
 		middleIndex := len(records) / 2
 		middleRecord := records[middleIndex]
 		middleRecordFromApi, err := sdk.GetQuote(middleRecord.Id)
+		if err != nil {
+			t.Error(err)
+		}
 		if middleRecordFromApi != middleRecord {
 			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
 		}
@@ -153,6 +181,9 @@ func TestEndpoints(t *testing.T) {
 		middleIndex := len(records) / 2
 		middleRecord := records[middleIndex]
 		middleRecordFromApi, err := sdk.GetChapter(middleRecord.Id)
+		if err != nil {
+			t.Error(err)
+		}
 		if middleRecordFromApi != middleRecord {
 			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
 		}
