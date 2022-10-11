@@ -64,12 +64,54 @@ func TestFiltering(t *testing.T) {
 
 	sdk := NewSdk(apiKey)
 
-	characters, err := sdk.GetCharacters(Matches("name", "Gandalf"))
+	allCharacters, err := sdk.GetCharacters()
 	if err != nil {
-		t.Errorf("%v", err)
+		t.Error(err)
 	}
-	if len(characters) != 1 {
-		t.Errorf("Found %v characters", len(characters))
+	nTotalCharacters := len(allCharacters)
+	if nTotalCharacters == 0 {
+		t.Error("Did not find any characters")
+	}
+
+	{
+		gandalf, err := sdk.GetCharacters(Matches("name", "Gandalf"))
+		if err != nil {
+			t.Error(err)
+		}
+		if len(gandalf) != 1 {
+			t.Errorf("Found %v Gandalfs", len(gandalf))
+		}
+	}
+
+	{
+		notGandalf, err := sdk.GetCharacters(DoesntMatch("name", "Gandalf"))
+		if err != nil {
+			t.Error(err)
+		}
+		if len(notGandalf) != nTotalCharacters-1 {
+			t.Errorf("Found %v characters not matching gandalf, expected %v", len(notGandalf), nTotalCharacters-1)
+		}
+	}
+
+	hobbitsAndHumans, err := sdk.GetCharacters(Includes("race", []string{"Hobbit", "Human"}))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(hobbitsAndHumans) == 0 {
+		t.Error("Did not find any hobbits or humans")
+	}
+
+	notHobbitsAndHumans, err := sdk.GetCharacters(Excludes("race", []string{"Hobbit", "Human"}))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(notHobbitsAndHumans) == 0 {
+		t.Error("Did not find anything excluding hobbits or humans")
+	}
+
+	nSummedCharacters := len(hobbitsAndHumans) + len(notHobbitsAndHumans)
+	if nSummedCharacters != nTotalCharacters {
+		t.Errorf("Found %v summed characters, expected %v", nSummedCharacters, nTotalCharacters)
 	}
 }
 
