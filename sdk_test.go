@@ -34,7 +34,7 @@ func TestBooks(t *testing.T) {
 	}
 }
 
-func TestFillingIsCached(t *testing.T) {
+func TestChapterFillingIsCached(t *testing.T) {
 	rest.ResetApiCount()
 	if len(apiKey) == 0 {
 		t.Skip("Need api key for test")
@@ -42,13 +42,131 @@ func TestFillingIsCached(t *testing.T) {
 
 	sdk := NewSdk(apiKey)
 
-	_, err := sdk.GetFullChapters()
+	chapters, err := sdk.GetFullChapters()
 	if err != nil {
 		t.Errorf("%v", err)
+	}
+
+	if len(chapters) == 0 {
+		t.Errorf("Chapters was empty")
 	}
 
 	// One API call to get all the chapters, and 3 subsequent calls, each for one of the books.
 	if rest.GetApiCount() != 4 {
 		t.Errorf("Api made %v server calls", rest.GetApiCount())
+	}
+}
+
+// I had a hard time factoring this test out to avoid repeated code, given more time I would make
+// all data structs adhere to a parent type with getId and getName methods to make it easier to
+// abstract things like this out
+func TestEndpoints(t *testing.T) {
+	if len(apiKey) == 0 {
+		t.Skip("Need api key for test")
+	}
+	sdk := NewSdk(apiKey)
+
+	{
+		records, err := sdk.GetBooks()
+		if err != nil {
+			t.Error(err)
+		}
+		if len(records) == 0 {
+			t.Error("Did not find any records")
+		}
+		middleIndex := len(records) / 2
+		middleRecord := records[middleIndex]
+		middleRecordFromApi, err := sdk.GetBook(middleRecord.Id)
+		if middleRecordFromApi != middleRecord {
+			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
+		}
+	}
+
+	{
+		records, err := sdk.GetMovies()
+		if err != nil {
+			t.Error(err)
+		}
+		if len(records) == 0 {
+			t.Error("Did not find any records")
+		}
+		middleIndex := len(records) / 2
+		middleRecord := records[middleIndex]
+		middleRecordFromApi, err := sdk.GetMovie(middleRecord.Id)
+		if middleRecordFromApi != middleRecord {
+			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
+		}
+	}
+
+	{
+		records, err := sdk.GetCharacters()
+		if err != nil {
+			t.Error(err)
+		}
+		if len(records) == 0 {
+			t.Error("Did not find any records")
+		}
+		middleIndex := len(records) / 2
+		middleRecord := records[middleIndex]
+		middleRecordFromApi, err := sdk.GetCharacter(middleRecord.Id)
+		if middleRecordFromApi != middleRecord {
+			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
+		}
+	}
+
+	{
+		records, err := sdk.GetQuotes()
+		if err != nil {
+			t.Error(err)
+		}
+		if len(records) == 0 {
+			t.Error("Did not find any records")
+		}
+		middleIndex := len(records) / 2
+		middleRecord := records[middleIndex]
+		middleRecordFromApi, err := sdk.GetQuote(middleRecord.Id)
+		if middleRecordFromApi != middleRecord {
+			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
+		}
+
+		postFilled, err := sdk.FillQuote(middleRecordFromApi)
+		if err != nil {
+			t.Error(err)
+		}
+		sdkFilled, err := sdk.GetFullQuote(middleRecord.Id)
+		if err != nil {
+			t.Error(err)
+		}
+		if postFilled != sdkFilled {
+			t.Errorf("%+v did not equal %+v", postFilled, sdkFilled)
+		}
+	}
+
+	{
+		records, err := sdk.GetChapters()
+		if err != nil {
+			t.Error(err)
+		}
+		if len(records) == 0 {
+			t.Error("Did not find any records")
+		}
+		middleIndex := len(records) / 2
+		middleRecord := records[middleIndex]
+		middleRecordFromApi, err := sdk.GetChapter(middleRecord.Id)
+		if middleRecordFromApi != middleRecord {
+			t.Errorf("%+v did not equal %+v", middleRecordFromApi, middleRecord)
+		}
+
+		postFilled, err := sdk.FillChapter(middleRecordFromApi)
+		if err != nil {
+			t.Error(err)
+		}
+		sdkFilled, err := sdk.GetFullChapter(middleRecord.Id)
+		if err != nil {
+			t.Error(err)
+		}
+		if postFilled != sdkFilled {
+			t.Errorf("%+v did not equal %+v", postFilled, sdkFilled)
+		}
 	}
 }
